@@ -1,6 +1,7 @@
 package br.com.eliasnepo.proposta.propostas;
 
 import java.net.URI;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import br.com.eliasnepo.proposta.exceptions.DocumentException;
 
 @RestController
 @RequestMapping("/propostas")
@@ -23,6 +26,11 @@ public class PropostaController {
 	
 	@PostMapping
 	public ResponseEntity<?> insertProposta(@RequestBody @Valid PropostaRequest request) {
+		Optional<Proposta> propostaExists = propostaRepository.findByDocument(request.getDocument());
+		if (propostaExists.isPresent()) {
+			throw new DocumentException("Esse documento já existe.");
+		}
+		
 		Proposta proposta = request.toModel();
 		proposta = propostaRepository.save(proposta);
 		

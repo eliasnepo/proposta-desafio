@@ -15,7 +15,7 @@ public class Proposta {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(nullable = false)
+	@Column(unique = true, nullable = false)
 	private String document;
 	
 	@Column(unique = true, nullable = false)
