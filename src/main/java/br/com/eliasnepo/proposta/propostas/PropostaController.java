@@ -3,6 +3,7 @@ package br.com.eliasnepo.proposta.propostas;
 import java.net.URI;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -13,18 +14,26 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.eliasnepo.proposta.exceptions.DocumentException;
+import br.com.eliasnepo.proposta.feignclients.AnaliseFeignClient;
+import br.com.eliasnepo.proposta.feignclients.dto.ApiAnaliseRequest;
+import br.com.eliasnepo.proposta.feignclients.dto.ApiAnaliseResponseStatus;
+import feign.FeignException;
+import feign.FeignException.FeignClientException;
 
 @RestController
 @RequestMapping("/propostas")
 public class PropostaController {
 
 	private final PropostaRepository propostaRepository;
-
-	public PropostaController(PropostaRepository propostaRepository) {
+	private AnaliseFeignClient requesterDataClient;
+	
+	public PropostaController(PropostaRepository propostaRepository, AnaliseFeignClient requesterDataClient) {
 		this.propostaRepository = propostaRepository;
+		this.requesterDataClient = requesterDataClient;
 	}
 	
 	@PostMapping
+	@Transactional
 	public ResponseEntity<?> insertProposta(@RequestBody @Valid PropostaRequest request) {
 		Optional<Proposta> propostaExists = propostaRepository.findByDocument(request.getDocument());
 		if (propostaExists.isPresent()) {
@@ -34,6 +43,8 @@ public class PropostaController {
 		Proposta proposta = request.toModel();
 		proposta = propostaRepository.save(proposta);
 		
+		proposta = requestApi(proposta);
+		
 		URI uri = ServletUriComponentsBuilder
 				.fromCurrentRequest()
 				.path("/{id}")
@@ -41,5 +52,23 @@ public class PropostaController {
 				.toUri();
 		
 		return ResponseEntity.created(uri).body(new PropostaResponse(proposta));
+	}
+	
+	private Proposta requestApi(Proposta proposta) {
+		ApiAnaliseResponseStatus response = ApiAnaliseResponseStatus.COM_RESTRICAO;
+		
+		try {
+			response = requesterDataClient
+					.sendData(new ApiAnaliseRequest(proposta.getDocument(), proposta.getName(), proposta.getId().toString()))
+					.getResultadoSolicitacao();
+		} catch (FeignClientException ex) {
+			if (ex.getClass() == FeignException.UnprocessableEntity.class) {
+				proposta.setStatus(ApiAnaliseResponseStatus.COM_RESTRICAO);
+				return proposta;
+			}
+		}
+		
+		proposta.setStatus(response);
+		return proposta;
 	}
 }
