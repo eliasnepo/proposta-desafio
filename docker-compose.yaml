@@ -33,6 +33,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: keycloak
       POSTGRES_HOST: postgres
+      
 
   keycloak:
     image: jboss/keycloak
@@ -92,6 +93,18 @@ services:
       LOG_LEVEL: INFO
       KAFKA_HOST: "kafka:29092"
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+  
+  proposta:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    image: eliasnepo/proposta
+    container_name: proposta
+    ports:
+      - 8080:8080
+    environment:
+      APP_SOLICITACAO_URL: http://analise:9999
+      APP_CARTAO_URL: http://contas/8888
 
   jaeger:
     image: jaegertracing/all-in-one
