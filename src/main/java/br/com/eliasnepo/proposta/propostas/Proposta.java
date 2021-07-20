@@ -2,6 +2,7 @@ package br.com.eliasnepo.proposta.propostas;
 
 import java.math.BigDecimal;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -9,8 +10,11 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
+import br.com.eliasnepo.proposta.cartao.Cartao;
 import br.com.eliasnepo.proposta.feignclients.dto.ApiAnaliseResponseStatus;
+import br.com.eliasnepo.proposta.feignclients.dto.SolicitacaoCartaoResponse;
 
 @Entity
 public class Proposta {
@@ -33,6 +37,9 @@ public class Proposta {
 
 	@Enumerated(EnumType.STRING)
 	private PropostaStatus status;
+	
+	@OneToOne(cascade = CascadeType.MERGE)
+	private Cartao cartao;
 	
 	@Deprecated
 	public Proposta() { }
@@ -76,5 +83,9 @@ public class Proposta {
 
 	public void setStatus(ApiAnaliseResponseStatus status) {
 		this.status = status.toModel();
+	}
+
+	public void associaCartao(SolicitacaoCartaoResponse response) {
+		this.cartao = response.toModel(this);
 	}
 }
