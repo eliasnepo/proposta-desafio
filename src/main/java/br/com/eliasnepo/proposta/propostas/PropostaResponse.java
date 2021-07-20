@@ -10,6 +10,7 @@ public class PropostaResponse {
 	private String name;
 	private String address;
 	private BigDecimal salary;
+	private PropostaStatus status;
 	
 	public PropostaResponse(Proposta entity) {
 		this.id = entity.getId();
@@ -18,6 +19,7 @@ public class PropostaResponse {
 		this.name = entity.getName();
 		this.address = entity.getAddress();
 		this.salary = entity.getSalary();
+		this.status = entity.getStatus();
 	}
 
 	public Long getId() {
@@ -42,5 +44,9 @@ public class PropostaResponse {
 
 	public BigDecimal getSalary() {
 		return salary;
+	}
+
+	public PropostaStatus getStatus() {
+		return status;
 	}
 }

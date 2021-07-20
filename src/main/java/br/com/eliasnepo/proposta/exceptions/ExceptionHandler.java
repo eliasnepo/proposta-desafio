@@ -43,4 +43,18 @@ public class ExceptionHandler {
 		
 		return ResponseEntity.status(status).body(error);
 	}
+
+	@org.springframework.web.bind.annotation.ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<StandardError> resourceNotFound(ResourceNotFoundException e, HttpServletRequest request) {
+		HttpStatus status = HttpStatus.NOT_FOUND;
+		StandardError error = new StandardError(
+				LocalDateTime.now(),
+				status.value(), 
+				"Erro ao encontrar entidade.", 
+				e.getMessage(), 
+				request.getRequestURI() 
+				);
+		
+		return ResponseEntity.status(status).body(error);
+	}
 }

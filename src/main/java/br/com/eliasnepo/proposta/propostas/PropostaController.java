@@ -7,6 +7,8 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.eliasnepo.proposta.exceptions.DocumentException;
+import br.com.eliasnepo.proposta.exceptions.ResourceNotFoundException;
 import br.com.eliasnepo.proposta.feignclients.AnaliseFeignClient;
 import br.com.eliasnepo.proposta.feignclients.dto.ApiAnaliseRequest;
 import br.com.eliasnepo.proposta.feignclients.dto.ApiAnaliseResponseStatus;
@@ -34,7 +37,7 @@ public class PropostaController {
 	
 	@PostMapping
 	@Transactional
-	public ResponseEntity<?> insertProposta(@RequestBody @Valid PropostaRequest request) {
+	public ResponseEntity<PropostaResponse> insertProposta(@RequestBody @Valid PropostaRequest request) {
 		Optional<Proposta> propostaExists = propostaRepository.findByDocument(request.getDocument());
 		if (propostaExists.isPresent()) {
 			throw new DocumentException("Esse documento já existe.");
@@ -52,6 +55,13 @@ public class PropostaController {
 				.toUri();
 		
 		return ResponseEntity.created(uri).body(new PropostaResponse(proposta));
+	}
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<PropostaResponse> findById(@PathVariable Long id) {
+		Proposta proposta = propostaRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Não exista proposta com esse id."));
+		return ResponseEntity.ok(new PropostaResponse(proposta));
 	}
 	
 	private Proposta requestApi(Proposta proposta) {
