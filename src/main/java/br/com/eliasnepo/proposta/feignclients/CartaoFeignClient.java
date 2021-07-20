@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import br.com.eliasnepo.proposta.feignclients.dto.SolicitacaoCartaoRequest;
 import br.com.eliasnepo.proposta.feignclients.dto.SolicitacaoCartaoResponse;
 
-@FeignClient(name = "cartao-solicitacao", url = "${cartao-solicitacao.url}")
+@FeignClient(name = "cartao-solicitacao", url = "${cartao-solicitacao.url}", path = "${cartao-solicitacao.path}")
 public interface CartaoFeignClient {
 
 	@PostMapping
