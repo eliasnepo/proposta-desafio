@@ -18,6 +18,7 @@ import javax.persistence.OneToOne;
 import br.com.eliasnepo.proposta.biometria.Biometria;
 import br.com.eliasnepo.proposta.bloqueio.Bloqueio;
 import br.com.eliasnepo.proposta.bloqueio.BloqueioStatus;
+import br.com.eliasnepo.proposta.exceptions.IllegalOperationException;
 import br.com.eliasnepo.proposta.propostas.Proposta;
 
 @Entity
@@ -87,6 +88,9 @@ public class Cartao {
 	}
 
 	public Bloqueio block(String ip, String userAgent) {
+		if (this.status == BloqueioStatus.BLOQUEADO) {
+			throw new IllegalOperationException("Esse cartão já está bloqueado.");
+		}
 		this.status = BloqueioStatus.BLOQUEADO;
 		return new Bloqueio(ip, userAgent, this);
 	}
