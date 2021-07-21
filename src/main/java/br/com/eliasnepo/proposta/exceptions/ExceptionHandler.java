@@ -30,13 +30,13 @@ public class ExceptionHandler {
 		return ResponseEntity.status(status).body(error);
 	}
 	
-	@org.springframework.web.bind.annotation.ExceptionHandler(DocumentException.class)
-	public ResponseEntity<StandardError> documentValidation(DocumentException e, HttpServletRequest request) {
+	@org.springframework.web.bind.annotation.ExceptionHandler(IllegalOperationException.class)
+	public ResponseEntity<StandardError> documentValidation(IllegalOperationException e, HttpServletRequest request) {
 		HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
 		StandardError error = new StandardError(
 				LocalDateTime.now(),
 				status.value(), 
-				"Erro no campo documento.", 
+				"Erro de negócio.", 
 				e.getMessage(), 
 				request.getRequestURI() 
 				);

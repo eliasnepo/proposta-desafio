@@ -7,6 +7,8 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,6 +16,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import br.com.eliasnepo.proposta.biometria.Biometria;
+import br.com.eliasnepo.proposta.bloqueio.Bloqueio;
+import br.com.eliasnepo.proposta.bloqueio.BloqueioStatus;
 import br.com.eliasnepo.proposta.propostas.Proposta;
 
 @Entity
@@ -38,17 +42,20 @@ public class Cartao {
 	@OneToMany(mappedBy = "card")
 	private Set<Biometria> biometrias = new HashSet<>();
 	
+	@Enumerated(EnumType.STRING)
+	private BloqueioStatus status;
+	
 	@Deprecated
 	public Cartao() {
 	}
 
 	public Cartao(String number, LocalDateTime createdAt, String owner, BigDecimal creditLimit, Proposta proposta) {
-		super();
 		this.number = number;
 		this.createdAt = createdAt;
 		this.owner = owner;
 		this.creditLimit = creditLimit;
 		this.proposta = proposta;
+		this.status = BloqueioStatus.NAO_BLOQUEADO;
 	}
 
 	public Long getId() {
@@ -73,5 +80,14 @@ public class Cartao {
 
 	public Proposta getProposta() {
 		return proposta;
+	}
+
+	public BloqueioStatus getStatus() {
+		return status;
+	}
+
+	public Bloqueio block(String ip, String userAgent) {
+		this.status = BloqueioStatus.BLOQUEADO;
+		return new Bloqueio(ip, userAgent, this);
 	}
 }

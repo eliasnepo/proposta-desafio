@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import br.com.eliasnepo.proposta.exceptions.DocumentException;
+import br.com.eliasnepo.proposta.exceptions.IllegalOperationException;
 import br.com.eliasnepo.proposta.exceptions.ResourceNotFoundException;
 import br.com.eliasnepo.proposta.feignclients.AnaliseFeignClient;
 import br.com.eliasnepo.proposta.feignclients.dto.ApiAnaliseRequest;
@@ -40,7 +40,7 @@ public class PropostaController {
 	public ResponseEntity<PropostaResponse> insertProposta(@RequestBody @Valid PropostaRequest request) {
 		Optional<Proposta> propostaExists = propostaRepository.findByDocument(request.getDocument());
 		if (propostaExists.isPresent()) {
-			throw new DocumentException("Esse documento já existe.");
+			throw new IllegalOperationException("Esse documento já existe.");
 		}
 		
 		Proposta proposta = request.toModel();
