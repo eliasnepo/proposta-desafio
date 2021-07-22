@@ -21,6 +21,8 @@ import br.com.eliasnepo.proposta.feignclients.CartaoFeignClient;
 import br.com.eliasnepo.proposta.feignclients.dto.CarteiraApiRequest;
 import br.com.eliasnepo.proposta.feignclients.dto.CarteiraApiResponse;
 import feign.FeignException.UnprocessableEntity;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 
 @RestController
 @RequestMapping("/carteiras")
@@ -29,16 +31,22 @@ public class CarteiraController {
 	private final CarteiraRepository carteiraRepository;
 	private final CartaoRepository cartaoRepository;
 	private final CartaoFeignClient feignClient;
+	private final Tracer tracer;
 	
 	public CarteiraController(CarteiraRepository carteiraRepository, CartaoRepository cartaoRepository,
-			CartaoFeignClient feignClient) {
+			CartaoFeignClient feignClient, Tracer tracer) {
 		this.carteiraRepository = carteiraRepository;
 		this.cartaoRepository = cartaoRepository;
 		this.feignClient = feignClient;
+		this.tracer = tracer;
 	}
 	
 	@PostMapping("/{id}")
 	public ResponseEntity<?> associarCarteiraPaypal(@RequestBody @Valid CarteiraRequest request, @PathVariable Long id) {
+		
+		Span activeSpan = tracer.activeSpan();
+		activeSpan.setTag("request.email", request.getEmail());
+		
 		Cartao cartao = cartaoRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Não existe cartão com esse id."));
 		
