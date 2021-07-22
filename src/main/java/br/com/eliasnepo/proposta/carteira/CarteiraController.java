@@ -14,6 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.eliasnepo.proposta.cartao.Cartao;
 import br.com.eliasnepo.proposta.cartao.CartaoRepository;
+import br.com.eliasnepo.proposta.cartao.CarteiraNome;
 import br.com.eliasnepo.proposta.exceptions.IllegalOperationException;
 import br.com.eliasnepo.proposta.exceptions.ResourceNotFoundException;
 import br.com.eliasnepo.proposta.feignclients.CartaoFeignClient;
@@ -36,8 +37,19 @@ public class CarteiraController {
 		this.feignClient = feignClient;
 	}
 	
-	@PostMapping("/{id}")
-	public ResponseEntity<?> associarCarteira(@RequestBody @Valid CarteiraRequest request, @PathVariable Long id) {
+	@PostMapping("/{id}/associa-paypal")
+	public ResponseEntity<?> associarCarteiraPaypal(@RequestBody @Valid CarteiraRequest request, @PathVariable Long id) {
+		CarteiraNome walletName = CarteiraNome.PAYPAL;
+		return associaCarteira(walletName, id, request);
+	}
+	
+	@PostMapping("/{id}/associa-samsung-pay")
+	public ResponseEntity<?> associarCarteiraSamsungPay(@RequestBody @Valid CarteiraRequest request, @PathVariable Long id) {
+		CarteiraNome walletName = CarteiraNome.SAMSUNG_PAY;
+		return associaCarteira(walletName, id, request);
+	}
+	
+	private ResponseEntity<?> associaCarteira(CarteiraNome walletName, Long id, CarteiraRequest request) {
 		Cartao cartao = cartaoRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Não existe cartão com esse id."));
 		
@@ -45,12 +57,12 @@ public class CarteiraController {
 		
 		try {
 			response = feignClient
-					.associarCarteira(cartao.getNumber(), new CarteiraApiRequest(request.getEmail(), request.getCarteira()));
+					.associarCarteira(cartao.getNumber(), new CarteiraApiRequest(request.getEmail(), walletName.toString()));
 		} catch (UnprocessableEntity e) {
 			throw new IllegalOperationException("Cartão já associado a essa carteira.");
 		}
 		
-		Carteira carteira = new Carteira(response.getId(), request.getCarteira(), cartao);
+		Carteira carteira = new Carteira(response.getId(), walletName, cartao);
 		carteiraRepository.save(carteira);
 		
 		URI uri = ServletUriComponentsBuilder

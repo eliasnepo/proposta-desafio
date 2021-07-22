@@ -1,17 +1,22 @@
 package br.com.eliasnepo.proposta.carteira;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 import br.com.eliasnepo.proposta.cartao.Cartao;
+import br.com.eliasnepo.proposta.cartao.CarteiraNome;
 
 @Entity
 public class Carteira {
 
 	@Id
 	private String id;
-	private String wallet;
+	
+	@Enumerated(EnumType.STRING)
+	private CarteiraNome wallet;
 	
 	@ManyToOne
 	private Cartao card;
@@ -20,7 +25,7 @@ public class Carteira {
 	public Carteira() {
 	}
 	
-	public Carteira(String id, String wallet, Cartao card) {
+	public Carteira(String id, CarteiraNome wallet, Cartao card) {
 		this.id = id;
 		this.wallet = wallet;
 		this.card = card;
@@ -30,7 +35,7 @@ public class Carteira {
 		return id;
 	}
 
-	public String getWallet() {
+	public CarteiraNome getWallet() {
 		return wallet;
 	}
 

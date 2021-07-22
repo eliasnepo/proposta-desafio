@@ -1,8 +1,10 @@
 package br.com.eliasnepo.proposta.carteira;
 
+import br.com.eliasnepo.proposta.cartao.CarteiraNome;
+
 public class CarteiraResponse {
 
-	private String carteira;
+	private CarteiraNome carteira;
 	private Long cartaoId;
 	
 	public CarteiraResponse(Carteira carteira) {
@@ -10,7 +12,7 @@ public class CarteiraResponse {
 		this.cartaoId = carteira.getCard().getId();
 	}
 
-	public String getCarteira() {
+	public CarteiraNome getCarteira() {
 		return carteira;
 	}
 
