@@ -8,6 +8,8 @@ import br.com.eliasnepo.proposta.feignclients.dto.AvisoApiRequest;
 import br.com.eliasnepo.proposta.feignclients.dto.AvisoApiResponse;
 import br.com.eliasnepo.proposta.feignclients.dto.BloqueioRequest;
 import br.com.eliasnepo.proposta.feignclients.dto.BloqueioResponse;
+import br.com.eliasnepo.proposta.feignclients.dto.CarteiraApiRequest;
+import br.com.eliasnepo.proposta.feignclients.dto.CarteiraApiResponse;
 import br.com.eliasnepo.proposta.feignclients.dto.SolicitacaoCartaoRequest;
 import br.com.eliasnepo.proposta.feignclients.dto.SolicitacaoCartaoResponse;
 
@@ -22,4 +24,7 @@ public interface CartaoFeignClient {
 	
 	@PostMapping(value = "/{id}/avisos")
 	AvisoApiResponse sistemaLegadoAvisoCartao(@PathVariable String id, AvisoApiRequest request);
+	
+	@PostMapping(value = "/{id}/carteiras")
+	CarteiraApiResponse associarCarteira(@PathVariable String id, CarteiraApiRequest request);
 }
