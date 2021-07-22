@@ -37,19 +37,8 @@ public class CarteiraController {
 		this.feignClient = feignClient;
 	}
 	
-	@PostMapping("/{id}/associa-paypal")
+	@PostMapping("/{id}")
 	public ResponseEntity<?> associarCarteiraPaypal(@RequestBody @Valid CarteiraRequest request, @PathVariable Long id) {
-		CarteiraNome walletName = CarteiraNome.PAYPAL;
-		return associaCarteira(walletName, id, request);
-	}
-	
-	@PostMapping("/{id}/associa-samsung-pay")
-	public ResponseEntity<?> associarCarteiraSamsungPay(@RequestBody @Valid CarteiraRequest request, @PathVariable Long id) {
-		CarteiraNome walletName = CarteiraNome.SAMSUNG_PAY;
-		return associaCarteira(walletName, id, request);
-	}
-	
-	private ResponseEntity<?> associaCarteira(CarteiraNome walletName, Long id, CarteiraRequest request) {
 		Cartao cartao = cartaoRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Não existe cartão com esse id."));
 		
@@ -57,12 +46,12 @@ public class CarteiraController {
 		
 		try {
 			response = feignClient
-					.associarCarteira(cartao.getNumber(), new CarteiraApiRequest(request.getEmail(), walletName.toString()));
+					.associarCarteira(cartao.getNumber(), new CarteiraApiRequest(request.getEmail(), request.getCarteira().toString()));
 		} catch (UnprocessableEntity e) {
 			throw new IllegalOperationException("Cartão já associado a essa carteira.");
 		}
 		
-		Carteira carteira = new Carteira(response.getId(), walletName, cartao);
+		Carteira carteira = new Carteira(response.getId(), CarteiraNome.converter(request.getCarteira()), cartao);
 		carteiraRepository.save(carteira);
 		
 		URI uri = ServletUriComponentsBuilder
