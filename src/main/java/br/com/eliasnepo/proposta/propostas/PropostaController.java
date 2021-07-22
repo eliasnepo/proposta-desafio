@@ -6,7 +6,10 @@ import java.util.Optional;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +31,10 @@ import feign.FeignException.FeignClientException;
 public class PropostaController {
 
 	private final PropostaRepository propostaRepository;
-	private AnaliseFeignClient requesterDataClient;
+	private final AnaliseFeignClient requesterDataClient;
+	
+	@Value("${encrypt.document-salt}")
+	private String salt;
 	
 	public PropostaController(PropostaRepository propostaRepository, AnaliseFeignClient requesterDataClient) {
 		this.propostaRepository = propostaRepository;
@@ -38,12 +44,13 @@ public class PropostaController {
 	@PostMapping
 	@Transactional
 	public ResponseEntity<PropostaResponse> insertProposta(@RequestBody @Valid PropostaRequest request) {
-		Optional<Proposta> propostaExists = propostaRepository.findByDocument(request.getDocument());
+		String documentEncrypted = encrypt(request.getDocument());
+		Optional<Proposta> propostaExists = propostaRepository.findByDocument(documentEncrypted);
 		if (propostaExists.isPresent()) {
 			throw new IllegalOperationException("Esse documento já existe.");
 		}
 		
-		Proposta proposta = request.toModel();
+		Proposta proposta = request.toModel(documentEncrypted);
 		proposta = propostaRepository.save(proposta);
 		
 		proposta = requestApi(proposta);
@@ -80,5 +87,10 @@ public class PropostaController {
 		
 		proposta.setStatus(response);
 		return proposta;
+	}
+	
+	private String encrypt(String text) {
+		TextEncryptor encryptor = Encryptors.queryableText("document", salt);
+		return encryptor.encrypt(text);
 	}
 }

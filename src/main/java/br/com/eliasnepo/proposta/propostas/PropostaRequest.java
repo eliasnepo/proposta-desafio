@@ -52,7 +52,7 @@ public class PropostaRequest {
 		return salary;
 	}
 
-	public Proposta toModel() {
-		return new Proposta(this.document, this.email, this.name, this.address, this.salary);
+	public Proposta toModel(String document) {
+		return new Proposta(document, this.email, this.name, this.address, this.salary);
 	}
 }
